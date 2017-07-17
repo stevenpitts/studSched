@@ -1,0 +1,9 @@
+Split into 30-min blocks
+Maybe organize GUI using WPF and C#?
+
+
+Split into:
+    Should be here
+    Will be leaving soon
+    Should arrive soon
+    Scheduled to work later today
