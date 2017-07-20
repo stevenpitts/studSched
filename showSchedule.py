@@ -21,13 +21,9 @@ class Application(tk.Frame):
         self.pack()
     def alwaysUpdate(self):
         while True:
-            print("hi")
             newTime = getTimeAsHalfInt()
-            print("New time: "+str(newTime))
             timeDifferent = not (self.currentTime == newTime)
-            print("Time is different: "+str(timeDifferent))
             if timeDifferent:
-                print("readying update")
                 self.weekday = getWeekdayAsChar()
                 self.currentTime = getTimeAsHalfInt()
                 self.timeChanged()
@@ -61,7 +57,7 @@ class PeopleFrame(tk.Frame):
         self.peopleLabels = []
     def setPeopleList(self,peopleList): #edit for optimality later
         for label in self.peopleLabels:
-            label.forget_pack()
+            label.pack_forget()
         for person in peopleList:
             label = tk.Label(self,text=person)
             self.peopleLabels.append(label)
