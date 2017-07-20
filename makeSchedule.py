@@ -28,8 +28,7 @@ class MainFrame(tk.Frame):
         self.loadFileButton.pack_forget()
         self.newFileButton.pack_forget()
         buttons = [tk.Button(self.employeeButtonFrame,text=name,command=lambda name=name:self.editEmployeeHours(name)) for name in self.employeesDict.keys()]
-        for button in buttons:
-            button.pack()
+        for button in buttons: button.pack()
         self.newEmployeeButton.pack()
         self.editEmployeeButton.pack()
         self.saveButton.pack()
