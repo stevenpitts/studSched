@@ -12,22 +12,28 @@ class Application(tk.Frame):
         self.hereNowFrame = PeopleFrame(root=self,title="Here now:")
         self.leavingSoonFrame = PeopleFrame(root=self,title="Leaving soon:")
         self.arrivingSoonFrame = PeopleFrame(root=self,title="Arriving soon:")
-        self.hereNowFrame.pack()
-        self.leavingSoonFrame.pack()
-        self.arrivingSoonFrame.pack()
+        self.hereNowFrame.grid(row=0,column=0,rowspan=2,padx=20,pady=20,sticky='N')
+        self.leavingSoonFrame.grid(row=0,column=1,padx=20,pady=20)
+        self.arrivingSoonFrame.grid(row=1,column=1,padx=20,pady=20)
         _thread.start_new_thread(self.alwaysUpdate,tuple())
         self.timeChanged()
+        self.master.geometry('{}x{}'.format(800,800))
         self.pack()
     def alwaysUpdate(self):
         while True:
+            print("hi")
             newTime = getTimeAsHalfInt()
+            print("New time: "+str(newTime))
             timeDifferent = not (self.currentTime == newTime)
+            print("Time is different: "+str(timeDifferent))
             if timeDifferent:
+                print("readying update")
                 self.weekday = getWeekdayAsChar()
                 self.currentTime = getTimeAsHalfInt()
                 self.timeChanged()
-            time.sleep(1000)
+            time.sleep(1)
     def timeChanged(self):
+        print("Time has changed")
         timeTuple = (self.weekday,self.currentTime)
         nextTimeTuple = (self.weekday,self.currentTime + 0.5)
         hereNowList = []
@@ -51,7 +57,7 @@ class PeopleFrame(tk.Frame):
     def __init__(self,root=None,title="",*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.title = title
-        tk.Label(self,text=title).pack()
+        tk.Label(self,text=title,font=("Helvetica", 16)).pack()
         self.peopleLabels = []
     def setPeopleList(self,peopleList): #edit for optimality later
         for label in self.peopleLabels:
