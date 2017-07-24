@@ -19,6 +19,7 @@ class MainFrame(tk.Frame):
         self.editEmployeeButton= tk.Button(self,text="Edit employee hours",command=self.employeeButtonFrame.pack)
         self.master.geometry('{}x{}'.format(800,800))
         self.saveButton = tk.Button(self,text="Save file",command=self.save)
+        self.saveAndQuitButton = tk.Button(self,text="Save and exit",command=self.saveAndQuit)
         self.pack()
     def loadPeopleFile(self): #return (or set variable) to dict if success, else keep as none and throw an error
         filename = filedialog.askopenfilename(parent=self,title="Please open the txt file of the employees.",filetypes=(("Text files","*.txt"),("All files","*.*")))
@@ -68,6 +69,9 @@ class MainFrame(tk.Frame):
     def save(self):
         with open(self.employeesFileName,'w') as f:
             f.write(str(self.employeesDict))
+    def saveAndQuit(self):
+        self.save()
+        self.master.quit()
 class ScheduleGrid(tk.Frame):
     def __init__(self,root,employeeName=None,employeeList=[],*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
