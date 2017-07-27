@@ -16,13 +16,11 @@ class Application(tk.Frame):
         self.hereNowFrame.grid(row=1,column=0,rowspan=2,padx=20,pady=20,sticky='N')
         self.leavingSoonFrame.grid(row=1,column=1,padx=20,pady=20)
         self.arrivingSoonFrame.grid(row=2,column=1,padx=20,pady=20)
-        self.timeFrame.grid(row=0,column=1,columnspan=3,padx=20,pady=20,sticky="NE")
+        self.timeFrame.grid(row=0,column=0,columnspan=3,padx=20,pady=20,sticky="NE")
         self.timeFrame.config(borderwidth=10)
         _thread.start_new_thread(self.alwaysUpdate,tuple())
         self.timeChanged()
         self.master.geometry('{}x{}'.format(800,800))
-        self.master.configure(background="#a1dbcd")
-        
         self.pack()
     def alwaysUpdate(self):
         while True:
@@ -35,7 +33,7 @@ class Application(tk.Frame):
             self.timeFrame.updateTimeFrame()
             time.sleep(1)
     def timeChanged(self):
-        #print("Time has changed")
+        print("Time has changed")
         timeTuple = (self.weekday,self.currentTime)
         nextTimeTuple = (self.weekday,self.currentTime + 0.5)
         hereNowList = []
@@ -58,14 +56,15 @@ class Application(tk.Frame):
 class PeopleFrame(tk.Frame):
     def __init__(self,root=None,title="",*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
-        self.title = title
-        tk.Label(self,text=title,font=("Helvetica", 16)).pack()
+        self.title = tk.StringVar()
+        self.title.set(title)
+        tk.Label(self,textvariable=self.title,font=("Helvetica", 26)).pack()
         self.peopleLabels = []
     def setPeopleList(self,peopleList): #edit for optimality later
         for label in self.peopleLabels:
             label.pack_forget()
         for person in peopleList:
-            label = tk.Label(self,text=person)
+            label = tk.Label(self,text=person,font=("Courier", 20))
             self.peopleLabels.append(label)
             label.pack()
 class TimeFrame(tk.Frame):
@@ -74,8 +73,8 @@ class TimeFrame(tk.Frame):
         self.master = root
         self.dayOfWeekVar = tk.StringVar()
         self.timeVar = tk.StringVar()
-        self.dayOfWeekLabel = tk.Label(self,textvariable=self.dayOfWeekVar,font=("Helvetica",26))
-        self.timeLabel = tk.Label(self,textvariable=self.timeVar,font=("Helvetica",16))
+        self.dayOfWeekLabel = tk.Label(self,textvariable=self.dayOfWeekVar,font=("Helvetica", 40))
+        self.timeLabel = tk.Label(self,textvariable=self.timeVar,font=("fixedsys",32) )
         self.dayOfWeekLabel.pack()
         self.timeLabel.pack()
     def updateTimeFrame(self):
