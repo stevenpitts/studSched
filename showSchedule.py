@@ -3,6 +3,11 @@ import datetime
 import time
 import _thread
 from tkinter import filedialog
+#import conf.py
+
+
+bfs=20 #base font size
+
 class Application(tk.Frame):
     def __init__(self,root=tk.Tk(),*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
@@ -16,7 +21,7 @@ class Application(tk.Frame):
         self.hereNowFrame.grid(row=1,column=0,rowspan=2,padx=20,pady=20,sticky='N')
         self.leavingSoonFrame.grid(row=1,column=1,padx=20,pady=20)
         self.arrivingSoonFrame.grid(row=2,column=1,padx=20,pady=20)
-        self.timeFrame.grid(row=0,column=0,columnspan=3,padx=20,pady=20,sticky="NE")
+        self.timeFrame.grid(row=0,column=0,columnspan=3,padx=20,pady=20,sticky="N")
         self.timeFrame.config(borderwidth=10)
         _thread.start_new_thread(self.alwaysUpdate,tuple())
         self.timeChanged()
@@ -58,13 +63,13 @@ class PeopleFrame(tk.Frame):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.title = tk.StringVar()
         self.title.set(title)
-        tk.Label(self,textvariable=self.title,font=("Helvetica", 26)).pack()
+        tk.Label(self,textvariable=self.title,font=("Helvetica", bfs*3)).pack()
         self.peopleLabels = []
     def setPeopleList(self,peopleList): #edit for optimality later
         for label in self.peopleLabels:
             label.pack_forget()
         for person in peopleList:
-            label = tk.Label(self,text=person,font=("Courier", 20))
+            label = tk.Label(self,text=person,font=("Courier", bfs*2))
             self.peopleLabels.append(label)
             label.pack()
 class TimeFrame(tk.Frame):
@@ -73,8 +78,8 @@ class TimeFrame(tk.Frame):
         self.master = root
         self.dayOfWeekVar = tk.StringVar()
         self.timeVar = tk.StringVar()
-        self.dayOfWeekLabel = tk.Label(self,textvariable=self.dayOfWeekVar,font=("Helvetica", 40))
-        self.timeLabel = tk.Label(self,textvariable=self.timeVar,font=("fixedsys",32) )
+        self.dayOfWeekLabel = tk.Label(self,textvariable=self.dayOfWeekVar,font=("Helvetica", bfs*4))
+        self.timeLabel = tk.Label(self,textvariable=self.timeVar,font=("fixedsys",bfs*3) )
         self.dayOfWeekLabel.pack()
         self.timeLabel.pack()
     def updateTimeFrame(self):
