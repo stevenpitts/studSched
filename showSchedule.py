@@ -3,13 +3,14 @@ import datetime
 import time
 import _thread
 from tkinter import filedialog
+from tkinter import messagebox
 #import conf.py
 
 
 bfs=20 #base font size
 
 class Application(tk.Frame):
-    def __init__(self,root=tk.Tk(),*args,**kwargs):
+    def __init__(self,root=None,*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.employeeDict = loadPeopleFile(self)
         self.weekday = getWeekdayAsChar()
@@ -18,15 +19,28 @@ class Application(tk.Frame):
         self.leavingSoonFrame = PeopleFrame(root=self,title="Leaving soon:")
         self.arrivingSoonFrame = PeopleFrame(root=self,title="Arriving soon:")
         self.timeFrame = TimeFrame(root=self)
-        self.hereNowFrame.grid(row=1,column=0,rowspan=2,padx=20,pady=20,sticky='N')
-        self.leavingSoonFrame.grid(row=1,column=1,padx=20,pady=20)
-        self.arrivingSoonFrame.grid(row=2,column=1,padx=20,pady=20)
+        self.hereNowFrame.grid(row=1,column=0,rowspan=2,padx=50,pady=50,sticky='N')
+        self.leavingSoonFrame.grid(row=1,column=1,padx=50,pady=50)
+        self.arrivingSoonFrame.grid(row=2,column=1,padx=50,pady=50)
         self.timeFrame.grid(row=0,column=0,columnspan=3,padx=20,pady=20,sticky="N")
         self.timeFrame.config(borderwidth=10)
+        
+        #self.infoButtonCommand = showAboutBox
+        #self.infoButtonFrame = tk.Frame(self)
+        #self.infoButton = tk.Button(self.infoButtonFrame,text="?", command=lambda:print("8313"))
+        #self.infoButtonFrame.grid(row=3,column=1)
+        #self.infoButton.pack()
+        #print("1")
         _thread.start_new_thread(self.alwaysUpdate,tuple())
         self.timeChanged()
         self.master.geometry('{}x{}'.format(800,800))
         self.pack()
+        print("Steven Pitts\nMade for the TechSpot\nMaku")
+        #print("2")
+    #def showInfoBox(self):
+    #    print("ihewofa")
+    #    #messagebox.showinfo("About","Steven Pitts\nMade for the TechSpot\nMaku")
+        
     def alwaysUpdate(self):
         while True:
             newTime = getTimeAsHalfInt()
@@ -86,7 +100,6 @@ class TimeFrame(tk.Frame):
         dayOfWeekPretty,timePretty = getPrettyTime()
         self.dayOfWeekVar.set(dayOfWeekPretty)
         self.timeVar.set(timePretty)
-            
 def getTimeAsHalfInt():
     now = datetime.datetime.now()
     overHalf = (now.minute > 30)
@@ -119,5 +132,8 @@ def strFromTime(time):
     halfHourString = "00" if fullHour else "30"
     timeString = str(hour) + ":" + halfHourString + " " + noonSwitchString
     return timeString
-thing = Application()
-tk.mainloop()
+root=tk.Tk()
+thing = Application(root=root)
+#print("3")
+root.mainloop()
+#print("4")
