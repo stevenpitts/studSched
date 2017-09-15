@@ -2,28 +2,33 @@ import tkinter as tk
 import datetime
 import time
 import _thread
-from tkinter import filedialog
+from tkinter import filedialog, simpledialog
 from tkinter import messagebox
 #import conf.py
 
 
-bfs=20 #base font size
+bfs=10 #base font size
 
 class Application(tk.Frame):
     def __init__(self,root=None,*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.employeeDict = loadPeopleFile(self)
+        self.locationDesc = simpledialog.askstring("Location","Please enter a description of this schedule, such as \"Library\"")
         self.weekday = getWeekdayAsChar()
         self.currentTime = getTimeAsHalfInt()
         self.hereNowFrame = PeopleFrame(root=self,title="Here now:")
         self.leavingSoonFrame = PeopleFrame(root=self,title="Leaving soon:")
         self.arrivingSoonFrame = PeopleFrame(root=self,title="Arriving soon:")
         self.timeFrame = TimeFrame(root=self)
-        self.hereNowFrame.grid(row=1,column=0,rowspan=2,padx=50,pady=50,sticky='N')
-        self.leavingSoonFrame.grid(row=1,column=1,padx=50,pady=50)
-        self.arrivingSoonFrame.grid(row=2,column=1,padx=50,pady=50)
-        self.timeFrame.grid(row=0,column=0,columnspan=3,padx=20,pady=20,sticky="N")
+        self.descriptionFrame = DescriptionFrame(root=self)
+        self.hereNowFrame.grid(row=2,column=0,rowspan=2,padx=50,pady=50,sticky='N')
+        self.leavingSoonFrame.grid(row=2,column=1,padx=50,pady=50)
+        self.arrivingSoonFrame.grid(row=3,column=1,padx=50,pady=50)
+        self.timeFrame.grid(row=1,column=0,columnspan=3,padx=15,pady=15,sticky="N")
         self.timeFrame.config(borderwidth=10)
+        self.descriptionFrame.grid(row=0,column=0,columnspan=3, padx=10, pady=10, sticky="N")
+        
+        
         
         #self.infoButtonCommand = showAboutBox
         #self.infoButtonFrame = tk.Frame(self)
@@ -50,7 +55,7 @@ class Application(tk.Frame):
                 self.currentTime = getTimeAsHalfInt()
                 self.timeChanged()
             self.timeFrame.updateTimeFrame()
-            time.sleep(1)
+            time.sleep(0.1)
     def timeChanged(self):
         print("Time has changed")
         timeTuple = (self.weekday,self.currentTime)
@@ -86,6 +91,13 @@ class PeopleFrame(tk.Frame):
             label = tk.Label(self,text=person,font=("Courier", bfs*2))
             self.peopleLabels.append(label)
             label.pack()
+class DescriptionFrame(tk.Frame):
+    def __init__(self,root=None,title="",*args,**kwargs):
+        tk.Frame.__init__(self,root,*args,**kwargs)
+        self.master = root
+        self.descLabel = tk.Label(self,text=self.master.locationDesc,font=("Helvetica", bfs*4))
+        self.descLabel.pack()
+    
 class TimeFrame(tk.Frame):
     def __init__(self,root=None,title="",*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
@@ -132,8 +144,10 @@ def strFromTime(time):
     halfHourString = "00" if fullHour else "30"
     timeString = str(hour) + ":" + halfHourString + " " + noonSwitchString
     return timeString
-root=tk.Tk()
-thing = Application(root=root)
-#print("3")
-root.mainloop()
-#print("4")
+def main():
+    root=tk.Tk()
+    thing = Application(root=root)
+    #print("3")
+    root.mainloop()
+    #print("4")
+if  __name__ =='__main__':main()

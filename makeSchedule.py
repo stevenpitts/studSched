@@ -17,6 +17,7 @@ class MainFrame(tk.Frame):
         self.newEmployeeButton = tk.Button(self,text="New employee",command=self.createNewEmployee)
         self.employeeButtonFrame = tk.Frame(self)
         self.editEmployeeButton= tk.Button(self,text="Edit employee hours",command=self.employeeButtonFrame.pack)
+        self.hourDensityButton = tk.Button(self,text="Show hour density",command=self.showHourDensity)
         self.master.geometry('{}x{}'.format(800,800))
         self.saveButton = tk.Button(self,text="Save file",command=self.save)
         self.saveAndQuitButton = tk.Button(self,text="Save and exit",command=self.saveAndQuit)
@@ -33,7 +34,18 @@ class MainFrame(tk.Frame):
         self.newEmployeeButton.pack()
         self.editEmployeeButton.pack()
         self.saveButton.pack()
+        
+        self.hourDensityButton.pack()
         #print(self.employeesDict)
+    def showHourDensity(self):
+        hourDensityGrid = HourDensityGrid(self,employeeDict=self.employeesDict)
+        hourDensityGrid.pack()
+        
+        
+        
+        
+        
+        
     def newPeopleFile(self):
         filename = filedialog.asksaveasfilename(title="Where should it be saved?",filetypes=(("Text files","*.txt"),("All files","*.*")))
         self.employeesDict = dict()
@@ -43,6 +55,7 @@ class MainFrame(tk.Frame):
         self.newEmployeeButton.pack()
         self.editEmployeeButton.pack()
         self.saveButton.pack()
+        self.hourDensityButton.pack()
     def createNewEmployee(self):
         if(self.employeesDict == None):
             tk.messagebox.showwarning("Warning","No file is open")
@@ -101,7 +114,45 @@ class ScheduleGrid(tk.Frame):
             if bool(box):
                 listThing.append((self.daysOfWeekShort[box.col],self.times[box.row]))
         return listThing
-        
+class HourDensityGrid(tk.Frame):
+    def __init__(self,root,employeeDict,*args,**kwargs):
+        tk.Frame.__init__(self,root,*args,**kwargs)
+        self.master = root
+        def getHourDensityDict(employeeDict):
+            weekdays = ['M','T','W','R','F']
+            times = [float(x)/2 for x in range(14,38)]
+            hourDensityDict = {(weekday,time):0 for weekday in weekdays for time in times}
+            for employee in employeeDict.keys():
+                timeTupleList = employeeDict[employee]
+                for timeTuple in timeTupleList:
+                    hourDensityDict[timeTuple]+=1
+            return hourDensityDict
+        def getCoordDensityDict(hourDensityDict):
+            weekdays = ['M','T','W','R','F']
+            times = [float(x)/2 for x in range(14,38)]
+            weekdayToCoord = {weekday:1+weekdays.index(weekday) for weekday in weekdays}
+            timeToCoord = {time:1+times.index(time) for time in times}
+            timeTupleToCoords = {(weekday,time):(weekdayToCoord[weekday],timeToCoord[time]) for weekday in weekdays for time in times}
+            coordDensityDict = {timeTupleToCoords[timeTuple]:hourDensityDict[timeTuple] for timeTuple in hourDensityDict.keys()}
+            return coordDensityDict
+            
+        self.closeButton = tk.Button(self,text="Close density grid",command=self.destroy)
+        self.closeButton.grid(row=0,column=0)
+        hourDensityDict = getHourDensityDict(employeeDict)
+        coordDensityDict = getCoordDensityDict(hourDensityDict)
+        times = [float(x)/2 for x in range(14,38)]
+        daysOfWeek = ['M','T','W','R','F']
+        for time in times:
+            timeLabel = tk.Label(self,text=str(time))
+            timeLabel.grid(row=times.index(time)+1,column=0)
+        for weekday in daysOfWeek:
+            dayOfWeekLabel = tk.Label(self,text=str(weekday))
+            dayOfWeekLabel.grid(row=0,column=daysOfWeek.index(weekday)+1)
+        for coordTuple in coordDensityDict.keys():
+            coordVal = coordDensityDict[coordTuple]
+            densityLabel = tk.Label(self,text=str(coordVal))
+            densityLabel.grid(row=coordTuple[1],column=coordTuple[0])
+            
 class BoxThing:
     def __init__(self,master,col=-1,row=-1):
         self.row = row
@@ -130,7 +181,7 @@ def strFromTime(time):
     halfHourString = "00" if fullHour else "30"
     timeString = str(hour) + ":" + halfHourString + " " + noonSwitchString
     return timeString
-    
+
     
 
 mainframe = MainFrame()
