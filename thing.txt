@@ -1,0 +1,1 @@
+{'Steven Pitts': {'Monday': [(9.5, 10.5)], 'Tuesday': [(9.5, 10.5)], 'Wednesday': [(9.5, 10.5)], 'Thursday': [(9.5, 10.5)], 'Friday': [(9.5, 10.5)]}}
