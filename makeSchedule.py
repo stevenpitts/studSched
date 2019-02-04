@@ -11,13 +11,14 @@ class MainFrame(tk.Frame):
         self.employeesDict = None #Dict of employees that map to a list of tuples of (weekday,timenum) eg ('M',7.5)
         self.loadFileButton = tk.Button(self,text="Load People File",command=self.loadPeopleFile)
         self.newFileButton = tk.Button(self,text="Create new People file", command=self.newPeopleFile)
+        self.deleteEmployeeButton = tk.Button(self,text="Remove employee",command=self.removeEmployee)  #delete employee record
         self.employeesFileName = None
         self.loadFileButton.pack()
         self.newFileButton.pack()
+        self.deleteEmployeeButton.pack()
         self.newEmployeeButton = tk.Button(self,text="New employee",command=self.createNewEmployee)
         self.employeeButtonFrame = tk.Frame(self)
         self.editEmployeeButton= tk.Button(self,text="Edit employee hours",command=self.employeeButtonFrame.pack)
-        self.hourDensityButton = tk.Button(self,text="Show hour density",command=self.showHourDensity)
         self.master.geometry('{}x{}'.format(800,800))
         self.saveButton = tk.Button(self,text="Save file",command=self.save)
         self.saveAndQuitButton = tk.Button(self,text="Save and exit",command=self.saveAndQuit)
@@ -34,18 +35,7 @@ class MainFrame(tk.Frame):
         self.newEmployeeButton.pack()
         self.editEmployeeButton.pack()
         self.saveButton.pack()
-        
-        self.hourDensityButton.pack()
         #print(self.employeesDict)
-    def showHourDensity(self):
-        hourDensityGrid = HourDensityGrid(self,employeeDict=self.employeesDict)
-        hourDensityGrid.pack()
-        
-        
-        
-        
-        
-        
     def newPeopleFile(self):
         filename = filedialog.asksaveasfilename(title="Where should it be saved?",filetypes=(("Text files","*.txt"),("All files","*.*")))
         self.employeesDict = dict()
@@ -55,7 +45,6 @@ class MainFrame(tk.Frame):
         self.newEmployeeButton.pack()
         self.editEmployeeButton.pack()
         self.saveButton.pack()
-        self.hourDensityButton.pack()
     def createNewEmployee(self):
         if(self.employeesDict == None):
             tk.messagebox.showwarning("Warning","No file is open")
@@ -64,18 +53,27 @@ class MainFrame(tk.Frame):
         self.employeesDict[name] = []
         self.editEmployeeHours(name)
         tk.Button(self.employeeButtonFrame,text=name,command=lambda:self.editEmployeeHours(name)).pack()
+    def removeEmployee(self):#TODO: depricated. remove dictionary enrty
+        employeeName = simpledialog.askstring("Employee name","Please enter the name of the employee")
+        try:
+            for name in employeesDict:
+                if name==employeeName:
+                    del self.employeesDict[employeeName]
+            print("Employee removed")
+        except:
+            print("employee not found")
     def editEmployeeHours(self,employeeName):
         print(str(employeeName)+" "+str(self.employeesDict[employeeName]))
         self.employeeButtonFrame.pack_forget()
-        employeeGrid = ScheduleGrid(self,employeeName=employeeName,employeeList=self.employeesDict[employeeName])
+        employeeGrid = InputBoxes(self,employeeName=employeeName,employeeList=self.employeesDict[employeeName])
         employeeGrid.pack()
         closeButton = tk.Button(self,text="Save employee hours",command=lambda:self.saveEmployeeHours(employeeName,employeeGrid,closeButton)) #Can I pass the button here?
         closeButton.pack()
         self.editEmployeeButton.pack_forget()
         self.newEmployeeButton.pack_forget()
-    def saveEmployeeHours(self,employeeName,scheduleGrid,closeButton):
-        self.employeesDict[employeeName] = scheduleGrid.asList()
-        scheduleGrid.pack_forget()
+    def saveEmployeeHours(self,employeeName,InputBoxes,closeButton):
+        self.employeesDict[employeeName] = InputBoxes.asList()
+        InputBoxes.pack_forget()
         closeButton.pack_forget()
         self.editEmployeeButton.pack()
         self.newEmployeeButton.pack()
@@ -85,15 +83,13 @@ class MainFrame(tk.Frame):
     def saveAndQuit(self):
         self.save()
         self.master.quit()
-class ScheduleGrid(tk.Frame):
+"""class ScheduleGrid(tk.Frame):
     def __init__(self,root,employeeName=None,employeeList=[],*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.master = root
         self.daysOfWeek = ["Monday","Tuesday","Wednesday","Thursday","Friday"]
         self.daysOfWeekShort = ['M','T','W','R','F']
         self.daysOfWeekLabels = [tk.Label(self,text=dayOfWeek) for dayOfWeek in self.daysOfWeekShort]
-        self.times = [float(x)/2 for x in range(14,38)]
-        self.timesLabels = [tk.Label(self,text=strFromTime(time)) for time in self.times]
         self.boxes = {(col,row):BoxThing(self,col=col,row=row) for row in range(len(self.times)) for col in range(len(self.daysOfWeek))}
         for i in range(len(self.timesLabels)):
             timeLabel = self.timesLabels[i]
@@ -113,46 +109,50 @@ class ScheduleGrid(tk.Frame):
         for box in self.boxes.values():
             if bool(box):
                 listThing.append((self.daysOfWeekShort[box.col],self.times[box.row]))
-        return listThing
-class HourDensityGrid(tk.Frame):
-    def __init__(self,root,employeeDict,*args,**kwargs):
+        return listThing"""
+class InputBoxes(tk.Frame):   #input start/end times for shift
+    def __init__(self,root,employeeName=None,employeeList=[],*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.master = root
-        def getHourDensityDict(employeeDict):
-            weekdays = ['M','T','W','R','F']
-            times = [float(x)/2 for x in range(14,38)]
-            hourDensityDict = {(weekday,time):0 for weekday in weekdays for time in times}
-            for employee in employeeDict.keys():
-                timeTupleList = employeeDict[employee]
-                for timeTuple in timeTupleList:
-                    hourDensityDict[timeTuple]+=1
-            return hourDensityDict
-        def getCoordDensityDict(hourDensityDict):
-            weekdays = ['M','T','W','R','F']
-            times = [float(x)/2 for x in range(14,38)]
-            weekdayToCoord = {weekday:1+weekdays.index(weekday) for weekday in weekdays}
-            timeToCoord = {time:1+times.index(time) for time in times}
-            timeTupleToCoords = {(weekday,time):(weekdayToCoord[weekday],timeToCoord[time]) for weekday in weekdays for time in times}
-            coordDensityDict = {timeTupleToCoords[timeTuple]:hourDensityDict[timeTuple] for timeTuple in hourDensityDict.keys()}
-            return coordDensityDict
-            
-        self.closeButton = tk.Button(self,text="Close density grid",command=self.destroy)
-        self.closeButton.grid(row=0,column=0)
-        hourDensityDict = getHourDensityDict(employeeDict)
-        coordDensityDict = getCoordDensityDict(hourDensityDict)
-        times = [float(x)/2 for x in range(14,38)]
-        daysOfWeek = ['M','T','W','R','F']
-        for time in times:
-            timeLabel = tk.Label(self,text=str(time))
-            timeLabel.grid(row=times.index(time)+1,column=0)
-        for weekday in daysOfWeek:
-            dayOfWeekLabel = tk.Label(self,text=str(weekday))
-            dayOfWeekLabel.grid(row=0,column=daysOfWeek.index(weekday)+1)
-        for coordTuple in coordDensityDict.keys():
-            coordVal = coordDensityDict[coordTuple]
-            densityLabel = tk.Label(self,text=str(coordVal))
-            densityLabel.grid(row=coordTuple[1],column=coordTuple[0])
-            
+        self.daysOfWeek = ["Monday","Tuesday","Wednesday","Thursday","Friday"]
+        self.daysOfWeekShort = ['M','T','W','R','F']
+        self.entryBoxes= {day:tk.Entry(self)for day in self.daysOfWeek}
+        for day in self.daysOfWeek:
+            tk.Label(self,text=day+": ").pack()
+            self.entryBoxes[day].pack()
+    def timesList(self,timesString):
+        startTime,endTime=timesString.split('-')#splits start and end times
+        startHourTemp,startMin=startTime.split(':')#splits start time into hours and minutes
+        startSuffix=startMin[-2:]
+        startMin=float(startMin[:-2])
+        endHourTemp,endMin=endTime.split(':')
+        endSuffix=endMin[-2:]
+        endMin=float(endMin[:-2])
+        startHour=float(startHourTemp)#converts start hours into int
+        endHour=float(endHourTemp)
+        shiftStart=self.timeConversion(startHour,startMin,startSuffix)
+        shiftEnd=self.timeConversion(endHour,endMin,endSuffix)
+        shiftDuration=shiftEnd-shiftStart
+        shiftDec=startHour+(startMin/60)#time shift begins in decimal format, i.e.: 8:30am=8.5
+        shiftList=[shiftDec]#list of start times for each half-hour segment of a shift
+        while (shiftDuration>0):
+            shiftDuration-=30
+            shiftDec+=0.5
+            shiftList.append(shiftDec)
+        return shiftList
+    def timeConversion(self,hour,minute,suffix):#simplifies process of calculating shift times
+        if (suffix=="PM"):
+            hour+=12
+        timeStamp=(hour*60)+minute
+        return timeStamp
+    def asList(self):
+        full_list = []
+        for day_of_week_index,day_of_week in enumerate(self.daysOfWeek):
+            short_day_of_week = self.daysOfWeekShort[day_of_week_index]
+            day_of_week_blocks = self.timesList(self.entryBoxes[day_of_week].get())
+            for block in day_of_week_blocks:
+                full_list.append((short_day_of_week,block))
+        return full_list
 class BoxThing:
     def __init__(self,master,col=-1,row=-1):
         self.row = row
@@ -181,7 +181,7 @@ def strFromTime(time):
     halfHourString = "00" if fullHour else "30"
     timeString = str(hour) + ":" + halfHourString + " " + noonSwitchString
     return timeString
-
+    
     
 
 mainframe = MainFrame()
