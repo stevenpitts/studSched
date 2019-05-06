@@ -28,7 +28,7 @@ class Application(tk.Frame):
         self.master.geometry('{}x{}'.format(800,800))
         self.pack()
         print("Steven Pitts\nMade for the TechSpot\nMaku")
-        
+
     async def always_update(self):
         while True:
             try:
@@ -79,7 +79,7 @@ class DescriptionFrame(tk.Frame):
         tk.Frame.__init__(self,root,*args,**kwargs)
         self.master = root
         tk.Label(self,text=self.master.location_description,font=("Helvetica", bfs*4)).pack()
-    
+
 class time_frame(tk.Frame):
     def __init__(self,root=None,title="",*args,**kwargs):
         tk.Frame.__init__(self,root,*args,**kwargs)
@@ -105,18 +105,18 @@ def get_pretty_time():
     now = datetime.datetime.now()
     longTime = str(now.hour)+":"+str(now.minute)+":"+str(now.second)
     return (get_current_weekday(),longTime)
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+
+
+
+
+
+
+
+
+
+
+
+
 
 class MainFrame(tk.Frame):
     def __init__(self,root=None,*args,**kwargs):
@@ -209,8 +209,10 @@ class InputBoxes(tk.Frame):   #input start/end times for shift
             self.entry_boxes[day].pack()
             if day in prev_range_lists_dict:
                 self.entry_boxes[day].insert(0,self.ranges_as_times(prev_range_lists_dict[day]))
-                
+
     def time_floats_from_str(self,times:str):
+        if not times:
+            return 0,0
         start_time,end_time=times.split('-')#splits start and end times
         start_time_float = self.time_str_to_float(start_time)
         end_time_float = self.time_str_to_float(end_time)
@@ -223,7 +225,7 @@ class InputBoxes(tk.Frame):   #input start/end times for shift
         hour = int(int(hour)+pm_modifier)
         minute = int(min_with_suffix[:-2])
         return hour+(minute/60)
-        
+
     def time_float_to_str(self,time_float):
         suffix = "PM" if time_float >= 12 else "AM"
         hour = int(time_float)
@@ -235,11 +237,12 @@ class InputBoxes(tk.Frame):   #input start/end times for shift
         return "{}-{}".format(self.time_float_to_str(range[0]),self.time_float_to_str(range[1]))
     def ranges_as_times(self,ranges):
         return ','.join([self.range_as_str(range) for range in ranges])
-        
+
     def as_range_lists_dict(self):
         return {day_of_week:self.times_list_from_day(self.entry_boxes[day_of_week].get().replace(' ','')) for day_of_week in self.days_of_week}
-    
-    
+
+
+
 
 
 
