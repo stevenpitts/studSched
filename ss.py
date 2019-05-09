@@ -143,6 +143,8 @@ class MainFrame(tk.Frame):
         self.pack()
     def loadPeopleFile(self): #return (or set variable) to dict if success, else keep as none and throw an error
         filename = filedialog.askopenfilename(parent=self,title="Please open the txt file of the employees.",filetypes=(("Text files","*.txt"),("All files","*.*")))
+        if not filename:
+            tk.messagebox.showerror('Error', "No file specified")
         with open(filename) as f:
             self.employees_dict = eval(f.read())
         self.employees_filename = filename
@@ -212,19 +214,23 @@ class InputBoxes(tk.Frame):   #input start/end times for shift
                 self.entry_boxes[day].insert(0,self.ranges_as_times(prev_range_lists_dict[day]))
 
     def time_floats_from_str(self,times:str):
-        if not times:
-            return 0,0
         start_time,end_time=times.split('-')#splits start and end times
         start_time_float = self.time_str_to_float(start_time)
         end_time_float = self.time_str_to_float(end_time)
         return start_time_float,end_time_float
     def times_list_from_day(self,times:str):
-        return [self.time_floats_from_str(timerange) for timerange in times.split(',')]
+        if not times.strip():
+            return []
+        return [self.time_floats_from_str(timerange) for timerange in times.split(',')
+                if times.strip()]
     def time_str_to_float(self,time:str):
         hour,min_with_suffix = time.split(':')
         pm_modifier = 12 if "pm" in time.lower() and int(hour) != 12 else 0
         hour = int(int(hour)+pm_modifier)
-        minute = int(min_with_suffix[:-2])
+        try:
+            minute = int(min_with_suffix[:-2])
+        except ValueError:
+            minute = int(min_with_suffix)
         return hour+(minute/60)
 
     def time_float_to_str(self,time_float):
@@ -241,6 +247,7 @@ class InputBoxes(tk.Frame):   #input start/end times for shift
 
     def as_range_lists_dict(self):
         return {day_of_week:self.times_list_from_day(self.entry_boxes[day_of_week].get().replace(' ','')) for day_of_week in self.days_of_week}
+
 
 
 
