@@ -5,6 +5,7 @@ from tkinter import filedialog, simpledialog
 from tkinter import messagebox
 import asyncio
 import math
+import traceback
 
 
 bfs=10 #base font size
@@ -19,12 +20,12 @@ class Application(tk.Frame):
         self.arriving_soon_frame = PeopleFrame(root=self,title="Arriving soon:")
         self.time_frame = time_frame(root=self)
         self.description_frame = DescriptionFrame(root=self)
-        self.here_now_frame.grid(row=2,column=0,rowspan=2,padx=50,pady=50,sticky='N')
-        self.leaving_soon_frame.grid(row=2,column=1,padx=50,pady=50)
-        self.arriving_soon_frame.grid(row=3,column=1,padx=50,pady=50)
-        self.time_frame.grid(row=1,column=0,columnspan=3,padx=15,pady=15,sticky="N")
+        self.here_now_frame.grid(row=2,column=0,rowspan=2,padx=10,pady=50,sticky='N')
+        self.leaving_soon_frame.grid(row=2,column=1,padx=10,pady=50)
+        self.arriving_soon_frame.grid(row=3,column=1,padx=10,pady=50)
+        self.time_frame.grid(row=1,column=0,columnspan=3,padx=5,pady=15,sticky="N")
         self.time_frame.config(borderwidth=10)
-        self.description_frame.grid(row=0,column=0,columnspan=3, padx=10, pady=10, sticky="N")
+        self.description_frame.grid(row=0,column=0,columnspan=3, padx=5, pady=10, sticky="N")
         self.master.geometry('{}x{}'.format(800,800))
         self.pack()
         print("Steven Pitts\nMade for the TechSpot\nMaku")
@@ -259,4 +260,8 @@ def main():
     else:
         thing = Application(root=true_root)
         asyncio.run(thing.always_update())
-if  __name__ =='__main__':main()
+if  __name__ =='__main__':
+    try:
+        main()
+    except Exception as e:
+        tk.messagebox.showerror('Error', ''.join(traceback.format_exception(type(e), e, e.__traceback__)))
