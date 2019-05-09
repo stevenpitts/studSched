@@ -253,10 +253,12 @@ class InputBoxes(tk.Frame):   #input start/end times for shift
 
 
 
-
+def show_error(self, *args):
+    tk.messagebox.showerror('Error', traceback.format_exception(*args))
 
 
 true_root = tk.Tk()
+tk.Tk.report_callback_exception = show_error
 
 
 
