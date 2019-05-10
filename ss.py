@@ -5,11 +5,9 @@ import asyncio
 import traceback
 
 
-bfs = 10  # base font size
-days_of_week = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
+BFS = 10  # base font size
+DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
                 "Saturday", "Sunday"]
-
-# TODO undo military time
 
 
 class Application(tk.Frame):
@@ -25,8 +23,9 @@ class Application(tk.Frame):
                                               title="Leaving soon:")
         self.arriving_soon_frame = PeopleFrame(root=self,
                                                title="Arriving soon:")
-        self.time_label = tk.Label(self, text="", font=("fixedsys", bfs*3))
-        self.description_frame = DescriptionFrame(root=self)
+        self.time_label = tk.Label(self, text="", font=("fixedsys", BFS*3))
+        self.description_label = tk.Label(self, text=self.location_description,
+                                          font=("Helvetica", BFS*4))
         self.here_now_frame.grid(row=2, column=0, rowspan=2, padx=10, pady=50,
                                  sticky='N')
         self.leaving_soon_frame.grid(row=2, column=1, padx=10, pady=50)
@@ -34,7 +33,7 @@ class Application(tk.Frame):
         self.time_label.grid(row=1, column=0, columnspan=3, padx=5, pady=15,
                              sticky="N")
         self.time_label.config(borderwidth=10)
-        self.description_frame.grid(row=0, column=0, columnspan=3, padx=5,
+        self.description_label.grid(row=0, column=0, columnspan=3, padx=5,
                                     pady=10, sticky="N")
         self.master.geometry('800x800')
         self.pack()
@@ -55,15 +54,14 @@ class Application(tk.Frame):
     def time_changed(self):
         now = datetime.now()
         current_time = now.hour + now.minute/60
-        current_day = days_of_week[datetime.today().weekday()]
+        current_day = DAYS_OF_WEEK[datetime.today().weekday()]
         here_now_list = []
         leaving_soon_list = []
         arriving_soon_list = []
         # If they're leaving soon, don't include in "here now".
         for person in self.employee_dict.keys():
-            person_times = self.employee_dict[person]
-            person_times_today = person_times[current_day]
-            for timerange in person_times_today:
+            person_times = self.employee_dict[person][current_day]
+            for timerange in person_times:
                 if timerange[0] < current_time < timerange[1]:
                     if timerange[1] - current_time > 0.5:
                         here_now_list.append(person)
@@ -83,24 +81,16 @@ class PeopleFrame(tk.Frame):
         self.title = tk.StringVar()
         self.title.set(title)
         tk.Label(self, textvariable=self.title,
-                 font=("Helvetica", bfs*3)).pack()
+                 font=("Helvetica", BFS*3)).pack()
         self.people_labels = []
 
     def set_people_list(self, people_list):  # edit for optimality later
         for label in self.people_labels:
             label.pack_forget()
         for person in people_list:
-            label = tk.Label(self, text=person, font=("Courier", bfs*2))
+            label = tk.Label(self, text=person, font=("Courier", BFS*2))
             self.people_labels.append(label)
             label.pack()
-
-
-class DescriptionFrame(tk.Frame):
-    def __init__(self, root=None, title="", *args, **kwargs):
-        tk.Frame.__init__(self, root, *args, **kwargs)
-        self.master = root
-        tk.Label(self, text=self.master.location_description,
-                 font=("Helvetica", bfs*4)).pack()
 
 
 def get_current_time_as_float():
@@ -161,7 +151,7 @@ class MainFrame(tk.Frame):
         self.load_file_button.pack_forget()
         self.new_file_button.pack_forget()
         buttons = [tk.Button(self.employee_button_frame, text=name,
-                             command=lambda name=name:self.edit_hours(name))
+                             command=lambda name=name: self.edit_hours(name))
                    for name in self.employees_dict.keys()]
         for button in buttons:
             button.pack()
@@ -236,65 +226,71 @@ class InputBoxes(tk.Frame):  # input start/end times for shift
     def __init__(self, root, prev_range_lists_dict={}, *args, **kwargs):
         tk.Frame.__init__(self, root, *args, **kwargs)
         self.master = root
-        self.entry_boxes = {day: tk.Entry(self) for day in days_of_week}
-        for day in days_of_week:
+        self.entry_boxes = {day: tk.Entry(self) for day in DAYS_OF_WEEK}
+        for day in DAYS_OF_WEEK:
             tk.Label(self, text=day+": ").pack()
             self.entry_boxes[day].pack()
             if day in prev_range_lists_dict:
-                self.entry_boxes[day].insert(0, self.ranges_as_times(
+                self.entry_boxes[day].insert(0, ranges_as_times(
                     prev_range_lists_dict[day]))
-
-    def time_floats_from_str(self, times: str):
-        start_time, end_time = times.split('-')  # splits start and end times
-        start_time_float = self.time_str_to_float(start_time)
-        end_time_float = self.time_str_to_float(end_time)
-        return start_time_float, end_time_float
-
-    def times_list_from_day(self, times: str):
-        if not times.strip():
-            return []
-        return [self.time_floats_from_str(timerange)
-                for timerange in times.split(',')
-                if times.strip()]
-
-    def time_str_to_float(self, timestr: str):
-        #  Naming it timestr cuz time is taken. Sue me.
-        hour, min_with_suffix = timestr.split(':')
-        pm_modifier = 12 if "pm" in timestr.lower() and int(hour) != 12 else 0
-        hour = int(int(hour)+pm_modifier)
-        try:
-            minute = int(min_with_suffix[:-2])
-        except ValueError:
-            minute = int(min_with_suffix)
-        return hour+(minute/60)
-
-    def time_float_to_str(self, time_float):
-        suffix = "PM" if time_float >= 12 else "AM"
-        hour = int(time_float)
-        if hour > 12:  # 12 should NOT be included
-            hour -= 12
-        minute = int((time_float-int(time_float))*60)
-        return "{}:{}{}".format(hour, str(minute).zfill(2), suffix)
-
-    def range_as_str(self, range):
-        return "{}-{}".format(self.time_float_to_str(range[0]),
-                              self.time_float_to_str(range[1]))
-
-    def ranges_as_times(self, ranges):
-        return ','.join([self.range_as_str(range) for range in ranges])
 
     def as_dict(self):
         return {day_of_week:
-                self.times_list_from_day(
+                times_list_from_day(
                     self.entry_boxes[day_of_week].get().replace(' ', ''))
-                for day_of_week in days_of_week}
+                for day_of_week in DAYS_OF_WEEK}
 
 
-def show_error(self, *args):
+def times_list_from_day(times: str):
+    if not times.strip():
+        return []
+    return [time_floats_from_str(timerange)
+            for timerange in times.split(',')
+            if times.strip()]
+
+
+def time_floats_from_str(times: str):
+    start_time, end_time = times.split('-')  # splits start and end times
+    start_time_float = time_str_to_float(start_time)
+    end_time_float = time_str_to_float(end_time)
+    return start_time_float, end_time_float
+
+
+def time_str_to_float(timestr: str):
+    #  Naming it timestr cuz time is taken. Sue me.
+    hour, min_with_suffix = timestr.split(':')
+    pm_modifier = 12 if "pm" in timestr.lower() and int(hour) != 12 else 0
+    hour = int(int(hour)+pm_modifier)
+    try:
+        minute = int(min_with_suffix[:-2])
+    except ValueError:
+        minute = int(min_with_suffix)
+    return hour+(minute/60)
+
+
+def ranges_as_times(ranges):
+    return ','.join([range_as_str(range) for range in ranges])
+
+
+def range_as_str(timespan):
+    return "{}-{}".format(time_float_to_str(timespan[0]),
+                          time_float_to_str(timespan[1]))
+
+
+def time_float_to_str(time_float):
+    suffix = "PM" if time_float >= 12 else "AM"
+    hour = int(time_float)
+    if hour > 12:  # 12 should NOT be included
+        hour -= 12
+    minute = int((time_float-int(time_float))*60)
+    return "{}:{}{}".format(hour, str(minute).zfill(2), suffix)
+
+
+def show_error(_, *args):
     tk.messagebox.showerror('Error', traceback.format_exception(*args))
 
 
-true_root = tk.Tk()
+TRUE_ROOT = tk.Tk()
 tk.Tk.report_callback_exception = show_error
 
 
@@ -302,10 +298,10 @@ def main():
     if tk.messagebox.askyesno("Mode Selection",
                               ("Are you attempting to edit the schedule? "
                                "('No' to show the schedule instead)")):
-        MainFrame(root=true_root)
+        MainFrame(root=TRUE_ROOT)
         tk.mainloop()
     else:
-        thing = Application(root=true_root)
+        thing = Application(root=TRUE_ROOT)
         asyncio.run(thing.always_update())
 
 
