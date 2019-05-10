@@ -32,6 +32,7 @@ class Application(tk.Frame):
 
     async def always_update(self):
         while True:
+            await asyncio.sleep(0.2)
             try:
                 self.update_idletasks()
                 self.update()
