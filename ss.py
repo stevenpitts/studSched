@@ -41,7 +41,6 @@ class Application(tk.Frame):
 
     async def always_update(self):
         while True:
-            await asyncio.sleep(0.2)
             try:
                 self.update_idletasks()
                 self.update()
@@ -61,7 +60,7 @@ class Application(tk.Frame):
         # If they're leaving soon, don't include in "here now".
         for person in self.employee_dict.keys():
             person_times = self.employee_dict[person][current_day]
-            for timerange in person_times:
+            for timerange in person_times: #TODO this logic isn't working
                 if timerange[0] < current_time < timerange[1]:
                     if timerange[1] - current_time > 0.5:
                         here_now_list.append(person)
@@ -87,6 +86,8 @@ class PeopleFrame(tk.Frame):
     def set_people_list(self, people_list):  # edit for optimality later
         for label in self.people_labels:
             label.pack_forget()
+            label.destroy()
+        self.people_labels = []
         for person in people_list:
             label = tk.Label(self, text=person, font=("Courier", BFS*2))
             self.people_labels.append(label)
