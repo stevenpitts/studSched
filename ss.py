@@ -58,8 +58,10 @@ class Application(tk.Frame):
         leaving_soon_list = []
         arriving_soon_list = []
         # If they're leaving soon, don't include in "here now".
-        for person in self.employee_dict.keys():
-            person_times = self.employee_dict[person][current_day]
+        for person, person_schedule in self.employee_dict.items():
+            if current_day not in person_schedule:
+                continue
+            person_times = person_schedule[current_day]
             for timerange in person_times: #TODO this logic isn't working
                 if timerange[0] < current_time < timerange[1]:
                     if timerange[1] - current_time > 0.5:
