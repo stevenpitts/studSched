@@ -12,7 +12,8 @@ DAYS_OF_WEEK = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday",
 
 class Application(tk.Frame):
     def __init__(self, root=None, *args, **kwargs):
-        tk.Frame.__init__(self, root, *args, **kwargs)
+        tk.Frame.__init__(self, root, borderwidth=20, relief='ridge',
+                          *args, **kwargs)
         self.employee_dict = load_people_file(self)
         self.location_description = simpledialog.askstring(
             "Location",
@@ -36,7 +37,7 @@ class Application(tk.Frame):
         self.description_label.grid(row=0, column=0, columnspan=3, padx=5,
                                     pady=10, sticky="N")
         self.master.geometry('800x800')
-        self.pack()
+        self.pack(side='left')
         print("Steven Pitts\nMade for the TechSpot\nMaku")
 
     async def always_update(self):
@@ -62,7 +63,7 @@ class Application(tk.Frame):
             if current_day not in person_schedule:
                 continue
             person_times = person_schedule[current_day]
-            for timerange in person_times: #TODO this logic isn't working
+            for timerange in person_times:
                 if timerange[0] < current_time < timerange[1]:
                     if timerange[1] - current_time > 0.5:
                         here_now_list.append(person)
@@ -304,8 +305,18 @@ def main():
         MainFrame(root=TRUE_ROOT)
         tk.mainloop()
     else:
-        thing = Application(root=TRUE_ROOT)
-        asyncio.run(thing.always_update())
+        num_screens = simpledialog.askinteger("How many files?",
+                                              "How many locations are there?",
+                                              minvalue=1, maxvalue=5)
+        if not num_screens:
+            tk.messagebox.showerror("Error", "Invalid response")
+            return
+        screens = [Application(root=TRUE_ROOT) for _ in range(num_screens)]
+
+        async def wait_for_application_end():
+            screen_tasks = [screen.always_update() for screen in screens]
+            await asyncio.gather(*screen_tasks)
+        asyncio.run(wait_for_application_end())
 
 
 if __name__ == '__main__':
