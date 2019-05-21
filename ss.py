@@ -48,6 +48,7 @@ class Application(tk.Frame):
                 self.time_changed()
                 self.time_label['text'] = datetime.strftime(datetime.now(),
                                                             '%a %I:%M:%S %p')
+                await asyncio.sleep(0.1)
             except tk.TclError:
                 return
 
