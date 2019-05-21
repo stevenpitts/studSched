@@ -24,16 +24,12 @@ class Application(tk.Frame):
                                               title="Leaving soon:")
         self.arriving_soon_frame = PeopleFrame(root=self,
                                                title="Arriving soon:")
-        self.time_label = tk.Label(self, text="", font=("fixedsys", BFS*3))
         self.description_label = tk.Label(self, text=self.location_description,
                                           font=("Helvetica", BFS*4))
         self.here_now_frame.grid(row=2, column=0, rowspan=2, padx=10, pady=50,
                                  sticky='N')
         self.leaving_soon_frame.grid(row=2, column=1, padx=10, pady=50)
         self.arriving_soon_frame.grid(row=3, column=1, padx=10, pady=50)
-        self.time_label.grid(row=1, column=0, columnspan=3, padx=5, pady=15,
-                             sticky="N")
-        self.time_label.config(borderwidth=10)
         self.description_label.grid(row=0, column=0, columnspan=3, padx=5,
                                     pady=10, sticky="N")
         self.master.geometry('800x800')
@@ -46,8 +42,6 @@ class Application(tk.Frame):
                 self.update_idletasks()
                 self.update()
                 self.time_changed()
-                self.time_label['text'] = datetime.strftime(datetime.now(),
-                                                            '%a %I:%M:%S %p')
                 await asyncio.sleep(0.1)
             except tk.TclError:
                 return
@@ -312,11 +306,23 @@ def main():
         if not num_screens:
             tk.messagebox.showerror("Error", "Invalid response")
             return
+
+        time_label = tk.Label(TRUE_ROOT, text="", font=("fixedsys", BFS*5))
+        time_label.pack(side='top')
+
+        async def always_update_time_label():
+            while True:
+                try:
+                    time_label['text'] = datetime.strftime(datetime.now(),
+                                                           '%a %I:%M:%S %p')
+                    await asyncio.sleep(0.1)
+                except tk.TclError:
+                    return
         screens = [Application(root=TRUE_ROOT) for _ in range(num_screens)]
+        screen_tasks = [screen.always_update() for screen in screens]
 
         async def wait_for_application_end():
-            screen_tasks = [screen.always_update() for screen in screens]
-            await asyncio.gather(*screen_tasks)
+            await asyncio.gather(*screen_tasks, always_update_time_label())
         asyncio.run(wait_for_application_end())
 
 
